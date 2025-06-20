@@ -1,8 +1,8 @@
-var napi = require('napi-build-utils')
-var gyp = require('./gyp')
+import napi from 'napi-build-utils'
+import gyp from './gyp.js'
 
-function runGyp (opts, target, cb) {
-  var args = ['node', 'index.js']
+export function runGyp (opts, target, cb) {
+  const args = ['node', 'index.js']
   if (opts.backend === 'node-ninja') {
     args.push('configure')
     args.push('build')
@@ -36,7 +36,7 @@ function runGyp (opts, target, cb) {
     runtime: opts.runtime,
     backend: opts.backend,
     log: opts.log,
-    args: args,
+    args,
     filter: function (command) {
       if (command.name === 'configure') {
         return configurePreGyp(command, opts)
@@ -45,8 +45,8 @@ function runGyp (opts, target, cb) {
   }, cb)
 }
 
-function configurePreGyp (command, opts) {
-  var binary = opts.pkg.binary
+export function configurePreGyp (command, opts) {
+  const binary = opts.pkg.binary
   if (binary && binary.module_name) {
     command.args.push('-Dmodule_name=' + binary.module_name)
   }
@@ -55,4 +55,4 @@ function configurePreGyp (command, opts) {
   }
 }
 
-module.exports = runGyp
+export default runGyp

@@ -1,1 +1,3 @@
-module.exports = { hello: require('./build/Release/native').hello }
+import { hello } from './build/Release/native.node'
+
+export default { hello }

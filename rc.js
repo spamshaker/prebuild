@@ -1,15 +1,16 @@
-var minimist = require('minimist')
-var targets = require('node-abi').supportedTargets
-var detectLibc = require('detect-libc')
-var napi = require('napi-build-utils')
+import minimist from 'minimist'
+import { supportedTargets as targets } from 'node-abi'
+import detectLibc from 'detect-libc'
+import napi from 'napi-build-utils'
+import rc0 from 'rc'
 
-var libc = process.env.LIBC || (detectLibc.isNonGlibcLinuxSync() && detectLibc.familySync()) || ''
+const libc = process.env.LIBC || (detectLibc.isNonGlibcLinuxSync() && detectLibc.familySync()) || ''
 
-var rc = require('rc')('prebuild', {
+const rc = rc0('prebuild', {
   target: process.versions.node,
   runtime: 'node',
   arch: process.arch,
-  libc: libc,
+  libc,
   platform: process.platform,
   all: false,
   force: false,
@@ -52,9 +53,11 @@ if (napi.isNapiRuntime(rc.runtime) && rc.target === process.versions.node) {
 }
 
 if (rc.target) {
-  var arr = [].concat(rc.target)
+  const arr = [].concat(rc.target)
   rc.prebuild = []
-  for (var k = 0, len = arr.length; k < len; k++) {
+  let k = 0
+  const len = arr.length
+  for (; k < len; k++) {
     if (!napi.isNapiRuntime(rc.runtime) || napi.isSupportedVersion(arr[k])) {
       rc.prebuild.push({
         runtime: rc.runtime,
@@ -75,8 +78,8 @@ if (rc['upload-all']) {
 
 rc['include-regex'] = new RegExp(rc['include-regex'], 'i')
 
-module.exports = rc
-
-if (!module.parent) {
-  console.log(JSON.stringify(module.exports, null, 2))
+if (process.argv[1] === import.meta.filename) {
+  console.log(JSON.stringify(rc, null, 2))
 }
+
+export default rc

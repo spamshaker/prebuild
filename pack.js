@@ -1,28 +1,28 @@
-var eachSeries = require('each-series-async')
-var fs = require('fs')
-var path = require('path')
-var tar = require('tar-stream')
-var zlib = require('zlib')
+import eachSeries from 'each-series-async'
+import fs from 'fs'
+import path from 'path'
+import tar from 'tar-stream'
+import zlib from 'zlib'
 
-function mode (octal) {
+export function mode (octal) {
   return parseInt(octal, 8)
 }
 
-function pack (filenames, tarPath, cb) {
+export function pack (filenames, tarPath, cb) {
   fs.mkdir(path.dirname(tarPath), { recursive: true }, function () {
     if (!Array.isArray(filenames)) {
       filenames = [filenames]
     }
 
-    var tarStream = tar.pack()
-    var ws = fs.createWriteStream(tarPath)
+    const tarStream = tar.pack()
+    const ws = fs.createWriteStream(tarPath)
     tarStream.pipe(zlib.createGzip({ level: 9 })).pipe(ws)
 
     eachSeries(filenames, function processFile (filename, nextFile) {
       fs.stat(filename, function (err, st) {
         if (err) return nextFile(err)
 
-        var stream = tarStream.entry({
+        const stream = tarStream.entry({
           name: filename.replace(/\\/g, '/').replace(/:/g, '_'),
           size: st.size,
           mode: st.mode | mode('444') | mode('222'),
@@ -41,4 +41,4 @@ function pack (filenames, tarPath, cb) {
   })
 }
 
-module.exports = pack
+export default pack

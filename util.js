@@ -1,9 +1,9 @@
-var path = require('path')
-var cp = require('child_process')
-var execSpawn = require('execspawn')
-var error = require('./error')
+import path from 'path'
+import cp from 'child_process'
+import execSpawn from 'execspawn'
+import error from './error.js'
 
-function getTarPath (opts, abi) {
+export function getTarPath (opts, abi) {
   return path.join('prebuilds', [
     opts.pkg.name,
     '-v', opts.pkg.version,
@@ -16,28 +16,28 @@ function getTarPath (opts, abi) {
   ].join(''))
 }
 
-function spawn (cmd, args, cb) {
+export function spawn (cmd, args, cb) {
   return cp.spawn(cmd, args).on('exit', function (code) {
     if (code === 0) return cb()
     cb(error.spawnFailed(cmd, args, code))
   })
 }
 
-function fork (file, cb) {
+export function fork (file, cb) {
   return cp.fork(file).on('exit', function (code) {
     if (code === 0) return cb()
     cb(error.spawnFailed(file, code))
   })
 }
 
-function exec (cmd, cb) {
+export function exec (cmd, cb) {
   return execSpawn(cmd, { stdio: 'inherit' }).on('exit', function (code) {
     if (code === 0) return cb()
     cb(error.spawnFailed(cmd, [], code))
   })
 }
 
-function run (item, cb) {
+export function run (item, cb) {
   if (path.extname(item) === '.js') {
     return fork(item, cb)
   } else {
@@ -45,13 +45,13 @@ function run (item, cb) {
   }
 }
 
-function platform () {
+export function platform () {
   return process.platform
 }
 
-function releaseFolder (opts, version) {
-  var type = (opts.debug ? 'Debug' : 'Release')
-  var binary = opts.pkg.binary
+export function releaseFolder (opts, version) {
+  const type = (opts.debug ? 'Debug' : 'Release')
+  const binary = opts.pkg.binary
   if (opts.backend === 'node-ninja') {
     return (binary && binary.module_path) || 'build/' + version + '/' + type
   } else {
@@ -59,10 +59,12 @@ function releaseFolder (opts, version) {
   }
 }
 
-exports.getTarPath = getTarPath
-exports.spawn = spawn
-exports.fork = fork
-exports.exec = exec
-exports.run = run
-exports.platform = platform
-exports.releaseFolder = releaseFolder
+export default {
+  getTarPath,
+  spawn,
+  fork,
+  exec,
+  run,
+  platform,
+  releaseFolder
+}

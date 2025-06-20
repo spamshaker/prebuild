@@ -1,5 +1,6 @@
 # When adding entries here, remember to also update `.npmignore`.
-
+.idea
+build/
 node_modules
 npm-debug.log
 yarn.lock

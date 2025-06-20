@@ -142,8 +142,13 @@ The default scopes should be fine.
 Native modules that are designed to work with [Node-API](https://nodejs.org/api/n-api.html#n_api_node_api), which was previously known as N-API, must explicitly declare the Node-API version(s) against which they can build. This is accomplished by including a `binary` property on the module's `package.json` file. For example:
 
 ```json
-"binary": {
-  "napi_versions": [2,3]
+{
+  "binary": {
+    "napi_versions": [
+      2,
+      3
+    ]
+  }
 }
 ```
 
@@ -162,9 +167,11 @@ The Node-API header files supplied with Node use the `NAPI_VERSION` preprocessor
 The following code must be included in the `binding.gyp` file of modules targeting Node-API:
 
 ```json
-"defines": [
-  "NAPI_VERSION=<(napi_build_version)",
-]
+{
+  "defines": [
+    "NAPI_VERSION=<(napi_build_version)"
+  ]
+}
 ```
 
 #### cmake-js

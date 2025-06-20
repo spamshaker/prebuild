@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 
-var path = require('path')
-var log = require('npmlog')
-var fs = require('fs')
-var eachSeries = require('each-series-async')
-var napi = require('napi-build-utils')
-var { glob } = require('glob')
+import path from 'path'
+import log from 'npmlog'
+import fs from 'fs'
+import eachSeries from 'each-series-async'
+import napi from 'napi-build-utils'
+import { glob } from 'glob'
+import rc from './rc.js'
+import prebuild from './prebuild.js'
+import upload from './upload.js'
+import { createRequire } from 'module'
 
-var pkg = require(path.resolve('package.json'))
-var rc = require('./rc')
-var prebuild = require('./prebuild')
-var upload = require('./upload')
-
-var prebuildVersion = require('./package.json').version
+const require = createRequire(import.meta.url)
+const pkg = require(path.join(process.cwd(), '/package.json'))
 if (rc.version) {
-  console.log(prebuildVersion)
+  console.log(pkg.version)
   process.exit(0)
 }
 
@@ -26,25 +26,25 @@ if (rc.verbose) {
 }
 
 if (rc.help) {
-  console.error(fs.readFileSync(path.join(__dirname, 'help.txt'), 'utf-8'))
+  console.error(fs.readFileSync(path.join(import.meta.dirname, 'help.txt'), 'utf-8'))
   process.exit(0)
 }
 
-log.info('begin', 'Prebuild version', prebuildVersion)
+log.info('begin', 'Prebuild version', pkg.version)
 
 // nvm! do not mess with headers? kkthx!
 delete process.env.NVM_IOJS_ORG_MIRROR
 delete process.env.NVM_NODEJS_ORG_MIRROR
 
-var buildLog = log.info.bind(log, 'build')
-var opts = Object.assign({}, rc, { pkg: pkg, log: log, buildLog: buildLog, argv: process.argv })
+const buildLog = log.info.bind(log, 'build')
+const opts = Object.assign({}, rc, { pkg, log, buildLog, argv: process.argv })
 
 if (napi.isNapiRuntime(rc.runtime)) napi.logMissingNapiVersions(rc.target, rc.prebuild, log)
 
 if (opts['upload-all']) {
-  glob('prebuilds/**/*', { nodir: true }).then(uploadFiles, onbuilderror)
+  glob('prebuilds/**/*', { nodir: true }).then(uploadFiles, onBuildError)
 } else {
-  var files = []
+  const files = []
   eachSeries(opts.prebuild, function (target, next) {
     prebuild(opts, target.target, target.runtime, function (err, tarGz) {
       if (err) return next(err)
@@ -52,7 +52,7 @@ if (opts['upload-all']) {
       next()
     })
   }, function (err) {
-    if (err) return onbuilderror(err)
+    if (err) return onBuildError(err)
     if (!opts.upload) return
     uploadFiles(files)
   })
@@ -61,13 +61,13 @@ if (opts['upload-all']) {
 function uploadFiles (files) {
   // NOTE(robinwassen): Only include unique files
   // See: https://github.com/prebuild/prebuild/issues/221
-  var uniqueFiles = files.filter(function (file, index) {
+  const uniqueFiles = files.filter(function (file, index) {
     return files.indexOf(file) === index
   })
 
   buildLog('Uploading ' + uniqueFiles.length + ' prebuilds(s) to GitHub releases')
   upload(Object.assign({}, opts, { files: uniqueFiles }), function (err, result) {
-    if (err) return onbuilderror(err)
+    if (err) return onBuildError(err)
     buildLog('Found ' + result.old.length + ' prebuild(s) on Github')
     if (result.old.length) {
       result.old.forEach(function (build) {
@@ -83,7 +83,7 @@ function uploadFiles (files) {
   })
 }
 
-function onbuilderror (err) {
+function onBuildError (err) {
   if (!err) return
   log.error('build', err.stack)
   process.exit(2)

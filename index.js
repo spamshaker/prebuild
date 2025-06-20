@@ -1,1 +1,1 @@
-exports.build = require('./build')
+export * from './build'

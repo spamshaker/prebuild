@@ -1,4 +1,4 @@
-var fs = require('fs')
-var assert = require('assert')
+import fs from 'fs'
+import assert from 'assert'
 
 assert.strictEqual(fs.existsSync('./build/Release/prebuild-napi-test-cmake.node'), true)

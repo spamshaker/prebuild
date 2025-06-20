@@ -1,14 +1,14 @@
-var util = require('./util')
+import util from './util.js'
 
-function strip (files, cb) {
+export function strip (files, cb) {
   // TODO no support on windows, noop
-  var platform = util.platform()
+  const platform = util.platform()
   if (platform === 'win32') return process.nextTick(cb)
 
   stripFiles(files, platform, cb)
 }
 
-function stripFiles (files, platform, cb) {
+export function stripFiles (files, platform, cb) {
   if (files.length === 0) {
     process.nextTick(cb)
     return
@@ -24,11 +24,11 @@ function stripFiles (files, platform, cb) {
   })
 }
 
-function stripArgs (platform, file) {
+export function stripArgs (platform, file) {
   if (platform === 'darwin') return [file, '-Sx']
   if (['freebsd', 'linux'].includes(platform)) return [file, '--strip-all']
   // TODO find out what args to use for other platforms, e.g. 'sunos'
   return []
 }
 
-module.exports = strip
+export default strip
